@@ -62,7 +62,7 @@ def monedas(arreglo):
 
 bool verificarStock(int copia,int cantidad){
     int valor = (copia*100)/cantidad
-    return 0<valor<=15
+    return 10<valor<=15
 }
 
 
