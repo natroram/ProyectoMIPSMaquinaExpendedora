@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-int main(){
-    char **a = {}; // NOMBRES
+char **a = {}; // NOMBRES
     int precios[] = {}; 
     int cantidad[] = {};
     int cantidadcopia[] = {};
+
+int main(){   
     *char valor= "SI"
     while (valor == "SI"){
         menu(precios,a,cantidad,cantidadcopia);
