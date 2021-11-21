@@ -18,7 +18,7 @@ int main(){
             total = monedas(arreglo)    
             if (total>=precio){
                 printf("COMPRA EXITOSA");
-                printf("SU VUELTO ES: %d",total-precio);
+                printf("SU VUELTO ES:    %d",total-precio);
                 cantidadcopia[opcionuser]=cantidnow-1;
             }
             else{
@@ -78,4 +78,16 @@ int menu(int precios[],char **nombres[],int cantidad[],int copia[]){
 
     }
     return 1;
+}
+
+
+a = []
+int containts(int valor){
+    int v= 0
+    for i in l:
+        if (i == valor ) 
+          v =1 
+        else 
+          v=-1
+    return v
 }

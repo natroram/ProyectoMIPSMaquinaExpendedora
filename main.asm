@@ -2,6 +2,7 @@
 	cantidades: .float 12.0, 12.0, 70.0, 50.0,80.0
 	copia: .float 1.5, 1.3, 57.0, 40.0, 10.0
 	precio: .float  7.2, 1.5, 1.1, 0.5,10.0
+	monedas: .float 0.01,0.05,0.1,0.25,0.5,1.0,5.0,10.0,20.0
 	p1: .asciiz "Agua"
 	p2: .asciiz "Coca Cola"
 	p3: .asciiz "Galletas"
@@ -17,21 +18,29 @@
 	string: .asciiz ".- "
 .text 
 	main :
-		j menu
+		#j menu	
+		addi $t0,$zero,20
+		mtc1 $t0,$f0
+		cvt.s.w $f0,$f0
+		
+		jal contains		
 
-#		addi $t0,$zero,0
-#		addi $a0,$zero,5
-#		l.s $f1,cantidades($t0)	
-#		l.s $f0,copia($t0)
-#		mtc1 $v0,$f2
-#		li $v0, 2
-#		mov.s $f12, $f2
-#		syscall 			
-	
-
-	exit:
-		li $v0,10
+		move $t8,$v0	
+				
+		li $v0,1
+		move $a0,$t8
 		syscall
+
+#		li $v0, 4
+#		la $a0, presentacion
+#		syscall		
+
+		j exit
+		
+		
+		
+	exit:
+
 
 	
 checkStock:
@@ -54,6 +63,11 @@ checkStock:
   l.s $f3,12($sp)
   addi $sp,$sp,16  
   jr $ra
+
+
+
+
+
 
 menu: 
 	li $v0, 4
@@ -147,3 +161,35 @@ else:
 		syscall
 		
 		j whilemenu
+
+contains:
+  addi $sp,$sp,24
+  sw $ra,0($sp)
+  sw $t0,4($sp) # 1
+  sw $t1,8($sp) # -1
+  sw $t2,12($sp) # i
+  sw $t3,16($sp) # i
+  s.s $f1,20($sp)  
+  addi $t3,$zero,-1
+  j loop
+  lw $ra,0($sp)
+  lw $t0,4($sp)
+  lw $t1,8($sp)
+  lw $t2,12($sp)
+  lw $t3,16($sp)
+  l.s $f1,20($sp)
+  addi $sp,$sp,24
+  jr $ra  
+			
+loop: 	  
+   	beq $t2,36,exitl # CAMBIAR ETIQUETA Y OBTENER EL LEN
+	l.s $f1,monedas($t2)   
+	addi $t2, $t2,4 
+	c.eq.s $f0,$f1
+	bc1t if
+if:
+        addi $t3,$zero,1
+       	j loop
+	
+			
+exitl: 
