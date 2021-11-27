@@ -1,0 +1,9 @@
+
+
+
+# TAREAS
+CHECKSTOCK *
+MENU  *
+CONTAINS *
+Manejador *
+MONEDAS *
