@@ -7,31 +7,36 @@ char **a = {}; // NOMBRES
     int cantidadcopia[] = {};
 
 int main(){   
-    *char valor= "SI"
-    while (valor == "SI"){
+    t8              t9
+    int valor= 1;int valor2 = 1;
+    while (valor == valor){
         menu(precios,a,cantidad,cantidadcopia);
         opcionuser= int(input("Ingrese el numero del producto: "))-1
         *char producto= a[opcionuser]
         int cantidnow= cantidadcopia[opcionuser]
         int precio = precios[opcionuser]
-        if (cantidnow>0){
+        if (0<cantidadnow){
+            
             total = monedas(arreglo)    
-            if (total>=precio){
-                printf("COMPRA EXITOSA");
-                printf("SU VUELTO ES:    %d",total-precio);
-                cantidadcopia[opcionuser]=cantidnow-1;
-            }
-            else{
+            if (total<precio){
                 printf("FALLO AL MOMENTO DE REALIZAR LA COMPRA");
                 printf("LA CANTIDAD DE DINERO INGRESADA ES INSUFICIENTE");
                 printf("SU DINERO SERA DEVUELTO: %d",total);
             }
+            else{
+                printf("COMPRA EXITOSA");
+                printf("SU VUELTO ES:    %d",total-precio);
+                cantidadcopia[opcionuser]=cantidnow-1; ---
+            
+            }
+            valor = input("DESEA COMPRAR OTRO PRODUCTO")
             
         }
         else {
             printf("ESTE PRODUCTO NO TIENE STOCK, ELIJA OTRO");
+            valor = input("DESEA COMPRAR OTRO PRODUCTO")
+
         }
-        valor = input("DESEA COMPRAR OTRO PRODUCTO")
 
     }
     return 0;
