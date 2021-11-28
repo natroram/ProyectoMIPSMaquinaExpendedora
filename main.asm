@@ -1,14 +1,14 @@
 .data 
-	cantidades: .float 12.0, 12.0, 70.0, 50.0,80.0
-	copia: .float 0, 1.3, 57.0, 40.0, 10.0
-	precio: .float  7.2, 1.5, 1.1, 0.5,10.0
+	cantidades: .float 50.0, 15.0, 70.0, 50.0
+	copia: .float 0.0, 2.0, 57.0, 40.0
+	precio: .float  2.0, 1.5, 0.75, 3.5
 	monedas: .float 0.01,0.05,0.1,0.25,0.5,1.0,5.0,10.0,20.0
-	p1: .asciiz "Agua"
-	p2: .asciiz "Coca Cola"
-	p3: .asciiz "Galletas"
-	p4: .asciiz "Chifles"
-	p5: .asciiz "Chifles222"
-	productos: .word p1, p2,p3,p4,p5
+	N: .word 4 #CANTIDAD DE PRODUCTOS
+	p1: .asciiz "KN95"
+	p2: .asciiz "ALCOHOL"
+	p3: .asciiz "GUANTES"
+	p4: .asciiz "GEL DESINFECTANTE"
+	productos: .word p1, p2,p3,p4
 	newline: .asciiz "\n"
 	space: .asciiz ", "
 	const: .float 100.0
@@ -19,8 +19,8 @@
 	flag: .asciiz "SI"
         buffer: .space 4
         labelmanejador: .asciiz "Desea seguir ingresando monedas/billetes: \n 1)Si \n 2)No \n"
-        labelmoneda: .asciiz "Ingrese una denominacion de dinero valida: \n"
-        labelcantidad: .asciiz "Ingrese el numero de monedas/billetes que tiene: \n "
+        labelmoneda: .asciiz "Ingrese una denominacion de dinero valida: "
+        labelcantidad: .asciiz "Ingrese el numero de monedas/billetes que tiene: "
         labelopcion: .asciiz "Ingrese el numero del producto:  "
         labelproducto: .asciiz "\n DESEA COMPRAR OTRO PRODUCTO: \n 1)Si \n 2)No \n"
         labelcompra: .asciiz "COMPRA EXITOSA\n"
@@ -28,8 +28,10 @@
         labelfallo: .asciiz "FALLO AL MOMENTO DE REALIZAR LA COMPRA \n"
 	labeldevolver: .asciiz "SU DINERO SERA DEVUELTO: "
 	labelsinstock: .asciiz "ESTE PRODUCTO NO TIENE STOCK, ELIJA OTRO\n"
+	labelgracias: .asciiz "GRACIAS POR SU COMPRA"
 .text 
-        lwc1 $f10,copia
+        lw $s7,N # CANTIDAD DE PRODUCTOS
+        
 	main :
 	
 		addi $t9,$zero,1
@@ -46,32 +48,40 @@
 		j exit
 		
 	exit:
+		li $v0, 4
+     		la $a0,labelgracias
+		syscall
 		li $v0,10
 		syscall	
 
 
-	
+#FUNCION QU VERIFICA EL STOCK DE UN PRODUCTO
+#SI EL PRODUCTO TIENE UN STOCK DE ENTRE 10 Y 15%,
+#SE DEBE EMITIR UNA NOTIFICIACION DE BAJA CANTIDAD	
 checkStock:
+  #reserva memoria
   addi $sp,$sp,-16
   sw $ra,0($sp)
   sw $t0,4($sp)
   s.s $f2,8($sp)
   s.s $f3,12($sp) 
+  #definir una constante y convertirla a float
   addi $t0,$zero,100
   mtc1 $t0,$f2
   cvt.s.w $f2,$f2
+  #CALCULO DE PROCENTAJE
   mul.s  $f3,$f0,$f2
   div.s  $f3,$f3,$f1
   mfc1 $v0,$f3
-  
+ # LIBERACION DE MEMORIA
   lw $ra,0($sp)
   lw $t0,4($sp)
   l.s $f2,8($sp)
   l.s $f3,12($sp)
   addi $sp,$sp,16  
   jr $ra
-
-
+#********************************************************************************************#
+#ETIQUETA QUE PRESENTA LOS PRODUCTOS DISPONIBLE Y SU INFORMACION
 menu: 
 	li $v0, 4
 	la $a0, presentacion
@@ -79,11 +89,13 @@ menu:
 	li $v0, 4
 	la $a0, titulo
 	syscall
+	mul $s7,$s7,4
 	j whilemenu	
 
+# WHILE QUE IMPRRIME LOS VALORES DEL ARREGLO
 whilemenu:
 	addi $t1,$t1,1
-   	beq $t0,20, getvalues# CAMBIAR ETIQUETA Y OBTENER EL LEN
+   	beq $t0,$s7, getvalues
 	l.s $f0,copia($t0)
 	l.s $f1,cantidades($t0)	
 	l.s $f2,precio($t0)
@@ -165,26 +177,8 @@ else:
 		j whilemenu
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#LISTO
+#*********************************************************************************************************
+# FUNCION QUE VERIFICA SI UNA DENOMINACION DE MONEDA SE ENCUENTRA EN EL ARREGLO
 contains:
   li $t2,0
   addi $sp,$sp,-20
@@ -197,7 +191,7 @@ contains:
   j loopcontains
 
 loopcontains: 	  
-  	beq $t2,36, freecontains # CAMBIAR ETIQUETA Y OBTENER EL LEN
+  	beq $t2,36, freecontains
 	l.s $f1,monedas($t2)   
 	addi $t2, $t2,4 
 	c.eq.s $f0,$f1
@@ -219,8 +213,8 @@ freecontains:
   jr $ra  
 
 			
-						
-
+# ************************************************************************************************						
+# PIDE LOS VALORES NECESARIOS(DENOMINACION,CANTIDAD). y calcula el dinero total ingresado por el usuario
 manejador:		
    addi $sp,$zero,-20
    sw $ra,0($sp)
@@ -238,19 +232,17 @@ manejador:
    
    j whilemanejador
    
- 
+#WHILE QUE  VERIFICA SI EL CLIENTE QUIERE INGRESAR MONEDAS
 whilemanejador:
    bne $t0,$t1,freemanejador
-      
-   addi $s0,$zero,1 # reservar
-   addi $s1,$zero,-1 # reservar
-   addi $s2,$zero,-1 # reservar
-   
+   #REINICIO DE FLAGS   
+   addi $s0,$zero,1 
+   addi $s1,$zero,-1
+   addi $s2,$zero,-1
     
-   
    j whilecheckcontains   
    
-
+# PIDE LOS DATOS PARA SABER SI DESEA CONTINUAR 
 input:
    li $v0, 4
    la $a0, labelmanejador
@@ -263,7 +255,7 @@ input:
    j whilemanejador
    
    
-
+# LIBERACION DE MEMORIA
 freemanejador:
  
    mfc1 $v0,$f1
@@ -278,9 +270,9 @@ freemanejador:
    jr $ra
  
  
-
+# BUCLE QUE CHEQUA SI LA DENOMINACION INGRESADA PERTENEZCA AL ARREGLO
 whilecheckcontains:
-   beq $s0,$s1,whilecantidad #next while
+   beq $s0,$s1,whilecantidad 
    
    li $v0, 4
    la $a0, labelmoneda
@@ -294,7 +286,7 @@ whilecheckcontains:
        
    j whilecheckcontains
    
- 
+#VERIFICA SI LA CANTIDAD DE MONEDAS INGRESADAS ES MAYOR A CERO
 whilecantidad:
    bgtz $s2, calculos #calculos
    
@@ -309,6 +301,7 @@ whilecantidad:
    
    j whilecantidad
 
+#CALCULO DEL TOTAL DE DINERO INGRESADO POR EL USUARIO
 calculos:
 
   mtc1 $s2,$f2
@@ -319,12 +312,19 @@ calculos:
   
   
 
+#***************************************************************************************
+
+
+#WHILE PRINCIPAL
 whilemain:
    bne $t8,$t9,exit
    addi $t0,$zero,0
    addi $t1,$zero,0
+   lw $s7,N
+   add $s7,$zero,$s7
    j menu
-   
+
+ # OBTIENES LOS VALORES INGRESADOS    
 getvalues:
    li $v0, 4
    la $a0, labelopcion
@@ -337,10 +337,9 @@ getvalues:
    addi $t1,$t1, -1
    mul $t1,$t1,4
    
+   
    l.s $f0,copia($t1)
-#   l.s $f1,cantidades($t1)	
    l.s $f30,precio($t1)
- #  lw $t7,productos($t1)
    addi $t5,$zero,0
    mtc1 $t5,$f8
    cvt.s.w $f8,$f8
@@ -354,7 +353,7 @@ getvalues:
    
    j inputprincipal
      
-    
+# VERIFICA SI EL PRODUCTO ELEGIDO TIENE UN STOCK MAYOR A CERO    
 cantidadvalida:
    jal manejador 
    mtc1 $v0,$f5
@@ -379,22 +378,22 @@ cantidadvalida:
    mtc1 $t9,$f9
    cvt.s.w $f9,$f9
    add.s $f0,$f0,$f9
-#   s.s $f0,$t1($f10) ACTUALIZAR STOCK
    j inputprincipal
       
      
-   
+# COMPRA FALLO
 fallocompra:
+	   li $v0, 4
+   la $a0,         labelfallo
+   syscall  
+
    li $v0, 4
    la $a0, labeldevolver
    syscall  
  
    li $v0, 2
    mov.s $f12, $f5
-   syscall 
-   
-   
-  
+   syscall  
   
 inputprincipal:
    li $v0, 4
